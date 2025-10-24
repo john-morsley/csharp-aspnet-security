@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Morsley.UK.Security.API/Morsley.UK.Security.API.csproj" Id="f54885d8-2e8f-4685-becf-5050b9e35206" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Morsley.UK.Security.API.SystemTests/Morsley.UK.Security.API.SystemTests.csproj" />
+  </Folder>
+</Solution>
