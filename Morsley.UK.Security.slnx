@@ -1,10 +1,13 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path="docker-compose.yaml" />
+    <File Path="keycloak/realm-export.json" />
     <File Path="LICENSE" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Morsley.UK.Security.API/Morsley.UK.Security.API.csproj" Id="f54885d8-2e8f-4685-becf-5050b9e35206" />
+    <Project Path="src/Morsley.UK.Security.UI/Morsley.UK.Security.UI.csproj" Id="e7b5d00f-31a4-4cd1-a005-085897c89f94" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Morsley.UK.Security.API.SystemTests/Morsley.UK.Security.API.SystemTests.csproj" />

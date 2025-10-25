@@ -1,21 +1,16 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+namespace Morsley.UK.Security.API.Controllers;
 
-namespace Morsley.UK.Security.API.Controllers
+[ApiController]
+[Route("health")]
+public class HealthController : ControllerBase
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class HealthController : ControllerBase
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult Get()
     {
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Get()
+        return Ok(new
         {
-            return Ok(new
-            {
-                Status = "Healthy",
-                Timestamp = DateTime.UtcNow
-            });
-        }
+            Status = "Healthy",
+        });
     }
 }

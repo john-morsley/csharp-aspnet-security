@@ -1,0 +1,182 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Morsley.UK.Security.UI</h1>
+    <div class="mt-4">
+        <p class="text-muted">This calls the API /health endpoint (does not require authorization)</p>
+        <button id="btnHealth" class="btn btn-info">Health</button>
+        <div id="healthResult" class="mt-3"></div>
+    </div>
+    <div class="mt-4">
+        <p class="text-muted">This calls the Keycloak get token endpoint</p>
+        <button id="btnToken" class="btn btn-info">Token</button>
+        <div id="tokenResult" class="mt-3"></div>
+    </div>
+    <div class="mt-4">
+        <p class="text-muted">This calls the API /greeting endpoint (requires authorization)</p>
+        <button id="btnGreeting" class="btn btn-info">Greeting</button>
+        <div id="greetingResult" class="mt-3"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let accessToken = null;
+
+        document.getElementById('btnHealth').addEventListener('click', async function() {
+            const btn = this;
+            const resultDiv = document.getElementById('healthResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Working...';
+            resultDiv.innerHTML = '<div class="spinner-border text-info" role="status"><span class="visually-hidden">Working...</span></div>';
+            
+            try {
+                const response = await fetch('@Url.Action("CheckApiHealth", "Home")');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const healthData = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
+                    var html = "<div class='alert alert-success'>";
+                    html += "<h5>Health Request - Successful</h5>";
+                    html += "<hr/>";
+                    html += "<p><strong>Status Code:</strong> " + data.statusCode + "</p>";                    
+                    html += "<p><strong>Status:</strong> " + healthData.status + "</p>";
+                    html += "</div>";
+                    resultDiv.innerHTML = html;                    
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h5>Health Request - Unsuccessful</h5>
+                            <hr/>
+                            <p><strong>Error:</strong> ${data.error || 'Unknown error'}</p>
+                            ${data.statusCode ? `<p><strong>Status Code:</strong> ${data.statusCode}</p>` : ''}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5>Health Request - Failed</h5>
+                        <hr/>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Health';
+            }
+        });
+
+        document.getElementById('btnToken').addEventListener('click', async function() {
+            const btn = this;
+            const resultDiv = document.getElementById('tokenResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Working...';
+            resultDiv.innerHTML = '<div class="spinner-border text-info" role="status"><span class="visually-hidden">Working...</span></div>';
+            
+            try {
+                const response = await fetch('@Url.Action("GetToken", "Home")', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    accessToken = data.token;
+                    const token = data.token;
+                    var html = "<div class='alert alert-success'>";
+                    html += "<h5>Token Request - Successful</h5>";
+                    html += "<hr/>";
+                    html += "<p><strong>Status Code:</strong> " + data.statusCode + "</p>";
+                    html += "<p><strong>Token</strong></p>";
+                    html += "<p><code class='text-dark'><small>" + token + "</small></code></p>";
+                    html += "<hr/>";
+                    html += "<p><strong>Token stored in memory</strong></p>";
+                    html += "</div>";
+                    resultDiv.innerHTML = html;
+                } else {
+                    var html = "<div class='alert alert-danger'>";
+                    html += "<h5>Token Request - Unsuccessful</h5>";
+                    html += "<hr/>";
+                    if (data.statusCode != undefined) {
+                        html += "<p><strong>Status Code:</strong> " + data.statusCode + "</p>";
+                    }
+                    html += "<p><strong>Error:</strong> " + data.error + "</p>";
+                    html += "<hr/>";
+                    html += "<p><strong>Are you sure Keycloak is up and running?</strong></p>";
+                    html += "</div>";
+                    resultDiv.innerHTML = html;
+                }
+            } catch (error) {
+                var html = "<div class='alert alert-danger'>";
+                html += "<h5>Token Request - Failed</h5>";
+                html += "<hr/>";
+                html += "<p><strong>Error:</strong> " + error.message + "</p>";
+                html += "</div>";
+                resultDiv.innerHTML = html;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Token';
+            }
+        });
+
+        document.getElementById('btnGreeting').addEventListener('click', async function() {
+            const btn = this;
+            const resultDiv = document.getElementById('greetingResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Working...';
+            resultDiv.innerHTML = '<div class="spinner-border text-info" role="status"><span class="visually-hidden">Working...</span></div>';
+            
+            try {
+                const response = await fetch('@Url.Action("GetGreeting", "Home")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token: accessToken })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class='alert alert-success'>
+                            <h5>Greeting Request - Successful</h5>
+                            <hr/>
+                            <p><strong>Status Code:</strong> ${data.statusCode}</p>
+                            <p><strong>Message:</strong> ${data.data}</p>
+                        </div>
+                    `;
+                } else {
+                    var html = "<div class='alert alert-danger'>";
+                    html += "<h5>Greeting Request - Unsuccessful</h5>";
+                    html += "<hr/>";
+                    html += "<p><strong>Status Code:</strong> " + data.statusCode + "</p>";
+                    if (data.error != '') {
+                        html += "<p><strong>Error:</strong> " + data.error + "</p>";
+                    }
+                    if (data.statusCode === 401) {
+                        html += "<hr/><p class='mt-2'><strong>This endpoint requires authentication.</strong></p>";
+                    } else {
+                        html += "<hr/><p class='mt-2'><strong>Click the Token button to obtain a valid JWT token.</strong></p>";
+                    }
+                    html += "</div>";
+                    resultDiv.innerHTML = html;
+                }
+            } catch (error) {
+                var html = "<div class='alert alert-danger'>";
+                html += "<h5>Greeting Request - Failed</h5>";
+                html += "<hr/>";
+                html += "<p><strong>Error:</strong> " + error.message + "</p>";
+                html += "</div>";
+                resultDiv.innerHTML = html;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Greeting';
+            }
+        });
+    </script>
+}

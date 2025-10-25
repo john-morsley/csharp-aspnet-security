@@ -1,5 +1,3 @@
-using Testcontainers.Keycloak;
-
 namespace Morsley.UK.Security.API.SystemTests;
 
 [SetUpFixture]
